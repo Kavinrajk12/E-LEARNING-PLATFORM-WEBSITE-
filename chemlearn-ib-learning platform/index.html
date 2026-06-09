@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ChemLearn — IB Chemistry R2: Kinetics</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;1,300&display=swap');
+:root{
+  --r:#0369a1;--r2:#075985;--r3:#0c4a6e;--r4:#082f49;
+  --rl:#e0f2fe;--rll:#f0f9ff;--ra:#38bdf8;--ra2:#7dd3fc;
+  --dk:#0a1628;--dk2:#0f2240;--dk3:#1a3a5c;--dk4:#2563a8;
+  --bg:#f0f9ff;--w:#fff;--bdr:#bae6fd;--txt:#0c1a2e;--mut:#075985;
+  --grn:#16a34a;--blu:#2563eb;--org:#ea580c;--yel:#d97706;
+  --sw:280px;--th:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+
+/* ── TOPBAR ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:var(--th);
+  background:linear-gradient(135deg,var(--dk),var(--dk2));
+  display:flex;align-items:center;gap:0;padding:0;
+  box-shadow:0 2px 20px rgba(3,105,161,.4);overflow:hidden;}
+#topbar::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--ra),var(--r),var(--r2));}
+.tinner{display:flex;align-items:center;gap:16px;padding:0 24px;width:100%;}
+.tlogo-wrap{display:flex;flex-direction:column;}
+.tlogo{font-family:'Fira Code',monospace;font-weight:600;font-size:1.1rem;
+  letter-spacing:.5px;background:linear-gradient(135deg,var(--ra),var(--ra2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tsubtitle{font-size:.6rem;font-weight:700;color:var(--ra);letter-spacing:2.5px;
+  text-transform:uppercase;margin-top:1px;}
+.tsep{width:1px;height:34px;background:rgba(56,189,248,.2);margin:0 6px;}
+.tmod{font-size:.78rem;font-weight:600;color:rgba(125,211,252,.7);letter-spacing:.3px;}
+.tsrch{flex:1;max-width:380px;position:relative;}
+.tsrch input{width:100%;padding:9px 14px 9px 38px;border:1px solid rgba(56,189,248,.2);
+  border-radius:10px;background:rgba(255,255,255,.06);color:#e0f2fe;
+  font-size:.84rem;outline:none;font-family:'Plus Jakarta Sans',sans-serif;transition:all .2s;}
+.tsrch input:focus{border-color:var(--ra);background:rgba(255,255,255,.1);}
+.tsrch input::placeholder{color:rgba(125,211,252,.5);}
+.tsrch .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:rgba(56,189,248,.6);font-size:.88rem;}
+.tright{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.tbadge{background:linear-gradient(135deg,var(--r),var(--r2));
+  padding:5px 14px;border-radius:8px;font-size:.71rem;font-weight:800;
+  color:#fff;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 10px rgba(3,105,161,.4);}
+#ham{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px;background:none;border:none;}
+#ham span{display:block;width:22px;height:2px;background:var(--ra2);border-radius:2px;}
+
+/* ── LAYOUT ── */
+#layout{display:flex;margin-top:var(--th);min-height:calc(100vh - var(--th));}
+
+/* ── SIDEBAR ── */
+#sb{width:var(--sw);background:var(--dk2);position:fixed;top:var(--th);
+  left:0;bottom:0;overflow-y:auto;padding-bottom:60px;
+  transition:transform .25s;z-index:100;
+  border-right:1px solid rgba(56,189,248,.1);}
+#sb::-webkit-scrollbar{width:3px;}
+#sb::-webkit-scrollbar-thumb{background:var(--r3);border-radius:2px;}
+.sbhd{padding:16px 18px 10px;font-size:.6rem;font-weight:800;letter-spacing:3px;
+  color:var(--ra);text-transform:uppercase;border-bottom:1px solid rgba(56,189,248,.1);
+  margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.sbhd::before{content:'';display:block;width:20px;height:2px;
+  background:linear-gradient(90deg,var(--ra),transparent);border-radius:1px;}
+.sbmod{margin-bottom:1px;}
+.sbmt{padding:10px 18px;font-size:.68rem;font-weight:700;color:rgba(125,211,252,.5);
+  text-transform:uppercase;letter-spacing:1px;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;
+  user-select:none;transition:all .15s;border-left:3px solid transparent;}
+.sbmt:hover{color:var(--ra2);background:rgba(3,105,161,.08);}
+.sbmt.active-mod{color:var(--ra);border-left-color:var(--ra);background:rgba(3,105,161,.1);}
+.sbmt .ar{transition:transform .2s;font-size:.55rem;opacity:.4;}
+.sbmt.open .ar{transform:rotate(90deg);}
+.sbitems{overflow:hidden;}
+.sbi{display:flex;align-items:center;gap:9px;padding:8px 18px 8px 26px;
+  font-size:.81rem;color:rgba(125,211,252,.6);cursor:pointer;
+  transition:all .12s;border-left:3px solid transparent;line-height:1.3;}
+.sbi:hover{background:rgba(3,105,161,.08);color:var(--ra2);}
+.sbi.active{background:rgba(3,105,161,.15);color:var(--ra2);
+  border-left-color:var(--ra);font-weight:700;}
+.sbi .dot{width:4px;height:4px;border-radius:50%;background:rgba(56,189,248,.25);flex-shrink:0;}
+.sbi.active .dot{background:var(--ra);}
+.sbb{margin-left:auto;font-size:.56rem;font-weight:800;padding:1px 6px;
+  border-radius:5px;letter-spacing:.5px;}
+.sbb.ahl{background:rgba(234,88,12,.2);color:#fdba74;}
+.sbb.sl{background:rgba(37,99,235,.15);color:#93c5fd;}
+.pbwrap{padding:14px 18px;border-top:1px solid rgba(56,189,248,.1);margin-top:8px;}
+.pblbl{font-size:.68rem;color:rgba(56,189,248,.5);margin-bottom:7px;
+  display:flex;justify-content:space-between;}
+.pbbar{height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.pbfill{height:100%;background:linear-gradient(90deg,var(--r),var(--ra));
+  border-radius:3px;transition:width .4s;width:0%;}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sw);flex:1;padding:30px 44px 80px;max-width:980px;}
+
+/* ── PAGES ── */
+.page{display:none;}.page.active{display:block;animation:pgIn .2s ease;}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO ── */
+.hero{border-radius:16px;padding:44px 48px;margin-bottom:24px;
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--dk),var(--dk2),var(--dk3));}
+.hero::after{content:'R2';position:absolute;right:32px;bottom:-36px;
+  font-size:13rem;font-weight:900;color:rgba(3,105,161,.07);
+  line-height:1;font-family:'Plus Jakarta Sans',sans-serif;pointer-events:none;}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--r),var(--ra),transparent);}
+.hero h1{font-size:2rem;color:#fff;font-weight:800;margin-bottom:8px;line-height:1.2;}
+.hero p{color:rgba(125,211,252,.75);font-size:.93rem;max-width:580px;
+  margin:0;line-height:1.75;font-weight:400;}
+.hero .hrow{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.hchip{background:rgba(255,255,255,.07);border:1px solid rgba(56,189,248,.2);
+  border-radius:8px;padding:5px 14px;font-size:.71rem;font-weight:700;
+  color:rgba(125,211,252,.8);letter-spacing:.3px;}
+.hchip.hl{border-color:rgba(234,88,12,.3);color:#fdba74;}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat{background:var(--w);border:1px solid var(--bdr);border-radius:12px;
+  padding:20px;text-align:center;border-top:3px solid var(--r);transition:transform .15s;}
+.stat:hover{transform:translateY(-2px);}
+.stat .sv{font-size:2.2rem;font-weight:900;color:var(--r2);margin-bottom:3px;line-height:1;}
+.stat .sl{font-size:.68rem;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:1.2px;}
+
+/* ── MODULE GRID ── */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(222px,1fr));gap:15px;}
+.mc{border:1px solid var(--bdr);border-radius:12px;background:var(--w);
+  padding:22px;cursor:pointer;transition:all .18s;
+  border-top:4px solid var(--r);position:relative;overflow:hidden;}
+.mc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--r),transparent);opacity:0;transition:opacity .2s;}
+.mc:hover{box-shadow:0 8px 28px rgba(3,105,161,.12);transform:translateY(-3px);}
+.mc:hover::after{opacity:1;}
+.mc.ahl{border-top-color:var(--org);}
+.mc .mn{font-size:.64rem;font-weight:800;letter-spacing:2px;
+  color:var(--r2);text-transform:uppercase;margin-bottom:7px;}
+.mc.ahl .mn{color:var(--org);}
+.mc .mt{font-size:.92rem;font-weight:800;margin-bottom:5px;color:var(--dk);}
+.mc .md{font-size:.75rem;color:var(--mut);line-height:1.6;}
+.mc .mf{margin-top:14px;font-size:.7rem;color:rgba(7,89,133,.6);
+  display:flex;align-items:center;gap:5px;font-weight:600;}
+
+/* ── BREADCRUMB ── */
+.bc{font-size:.72rem;color:var(--mut);margin-bottom:18px;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.bc a{color:var(--r2);font-weight:700;cursor:pointer;text-decoration:none;transition:color .15s;}
+.bc a:hover{color:var(--r);}
+.bc .sep{color:var(--ra2);opacity:.5;}
+
+/* ── CONTENT CARD ── */
+.cc{background:var(--w);border:1px solid var(--bdr);border-radius:14px;
+  padding:34px 38px;margin-bottom:22px;
+  box-shadow:0 2px 16px rgba(3,105,161,.06);}
+.ptitle{font-size:1.85rem;font-weight:800;color:var(--dk);
+  margin-bottom:5px;line-height:1.18;}
+.psub{font-size:.9rem;color:var(--r2);font-style:italic;margin-bottom:20px;
+  font-family:'Cormorant Garamond',serif;font-size:1.05rem;}
+h2{font-size:1.12rem;font-weight:800;margin:24px 0 10px;color:var(--dk);
+  padding-bottom:5px;border-bottom:2px solid var(--rl);}
+h3{font-size:.96rem;font-weight:700;margin:14px 0 6px;color:var(--r2);}
+p{line-height:1.82;margin-bottom:12px;font-size:.91rem;}
+ul,ol{padding-left:20px;margin-bottom:12px;}
+li{line-height:1.82;font-size:.91rem;margin-bottom:3px;}
+strong{color:var(--dk);}
+
+/* ── CALLOUT BOXES ── */
+.gbox{background:linear-gradient(135deg,var(--dk),var(--dk2),var(--r4));
+  border-radius:12px;padding:20px 26px;margin-bottom:24px;
+  position:relative;overflow:hidden;border-left:4px solid var(--ra);}
+.gbox::before{content:'?';position:absolute;right:18px;top:-8px;
+  font-size:7.5rem;font-weight:900;color:rgba(56,189,248,.06);line-height:1;}
+.gbox .gl{font-size:.6rem;font-weight:800;letter-spacing:2.5px;
+  color:var(--ra);text-transform:uppercase;margin-bottom:6px;}
+.gbox p{color:rgba(255,255,255,.82);font-size:.96rem;margin:0;line-height:1.7;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.08rem;}
+.dbox{background:var(--rll);border-left:4px solid var(--r);padding:13px 17px;
+  border-radius:0 10px 10px 0;margin:13px 0;}
+.dbox .dt{font-size:.6rem;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--r2);margin-bottom:4px;}
+.dbox p{margin:0;font-size:.87rem;line-height:1.65;}
+.note{background:#eff6ff;border-left:4px solid var(--blu);border-radius:10px;
+  padding:13px 17px;margin:13px 0;font-size:.87rem;}
+.warn{background:#fff7ed;border-left:4px solid var(--org);border-radius:10px;
+  padding:13px 17px;margin:13px 0;font-size:.87rem;}
+.tip{background:#f0fdf4;border-left:4px solid var(--grn);border-radius:10px;
+  padding:13px 17px;margin:13px 0;font-size:.87rem;}
+.fml{background:var(--rll);border-left:4px solid var(--r);border-radius:10px;
+  padding:13px 17px;margin:13px 0;font-size:.87rem;font-family:'Fira Code',monospace;}
+.ahlbox{background:rgba(234,88,12,.06);border:1px solid rgba(234,88,12,.2);
+  border-radius:10px;padding:15px 18px;margin:15px 0;}
+.ahlbox .at{font-size:.6rem;font-weight:800;letter-spacing:2px;
+  color:var(--org);text-transform:uppercase;margin-bottom:6px;}
+.blbl{font-size:.6rem;font-weight:800;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:4px;}
+.note .blbl{color:var(--blu);}.warn .blbl{color:var(--org);}
+.tip .blbl{color:var(--grn);}.fml .blbl{color:var(--r2);}
+
+/* ── CONCEPT CARDS ── */
+.crow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:15px 0;}
+.ccard{border:1px solid var(--bdr);border-radius:10px;padding:16px;
+  text-align:center;background:var(--rll);transition:all .15s;}
+.ccard:hover{box-shadow:0 5px 16px rgba(3,105,161,.14);transform:translateY(-2px);}
+.ccard .ci{font-size:1.9rem;margin-bottom:7px;}
+.ccard .ct{font-weight:800;margin-bottom:3px;font-size:.85rem;color:var(--dk);}
+.ccard .cd{font-size:.74rem;color:var(--mut);line-height:1.55;}
+
+/* ── OUTCOME GRID ── */
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:20px;}
+.oc{border:1px solid var(--bdr);border-radius:10px;padding:15px 17px;background:var(--w);}
+.oc.und{border-top:3px solid var(--blu);}
+.oc.app{border-top:3px solid var(--r);}
+.oct{font-size:.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;}
+.oc.und .oct{color:var(--blu);}.oc.app .oct{color:var(--r);}
+.oc ul{margin:0;padding-left:16px;}
+.oc li{font-size:.8rem;line-height:1.7;margin-bottom:3px;}
+
+/* ── DATA TABLE ── */
+.dtbl{width:100%;border-collapse:collapse;margin:13px 0;font-size:.83rem;}
+.dtbl th{background:linear-gradient(135deg,var(--dk),var(--r4));color:#fff;
+  padding:9px 11px;text-align:center;font-size:.73rem;font-weight:700;}
+.dtbl td{padding:7px 10px;border:1px solid var(--bdr);text-align:center;vertical-align:middle;}
+.dtbl tr:nth-child(even) td{background:var(--rll);}
+
+/* ── VOCAB TABLE ── */
+.vtbl{width:100%;border-collapse:collapse;margin:13px 0 20px;font-size:.84rem;}
+.vtbl th{background:linear-gradient(135deg,var(--dk),var(--r4));color:#fff;
+  padding:9px 13px;text-align:left;font-size:.73rem;font-weight:700;}
+.vtbl td{padding:9px 13px;border-bottom:1px solid var(--bdr);vertical-align:top;line-height:1.6;}
+.vtbl tr:hover td{background:var(--rll);}
+.vtbl .tm{font-family:'Fira Code',monospace;color:var(--r2);font-weight:600;font-size:.82rem;}
+
+/* ── EXAMPLE / PRACTICE ── */
+.exbox{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin:17px 0;}
+.exhd{background:linear-gradient(135deg,var(--r2),var(--r3));color:#fff;
+  padding:9px 16px;font-size:.8rem;font-weight:800;
+  display:flex;align-items:center;gap:8px;border-left:4px solid var(--ra);}
+.exbd{padding:16px;background:#fff;}
+.exbd p:last-child{margin-bottom:0;}
+.prbox{border:1px solid #fed7aa;border-radius:10px;overflow:hidden;margin:17px 0;}
+.prhd{background:linear-gradient(135deg,#ea580c,#f97316);color:#fff;
+  padding:9px 16px;font-size:.8rem;font-weight:800;}
+.prbd{padding:16px;background:#fff7ed;}
+
+/* ── FORMULA GRID ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:13px 0;}
+.fi{background:var(--rll);border:1px solid var(--bdr);border-radius:10px;
+  padding:13px 16px;text-align:center;}
+.fi .fil{font-size:.6rem;color:var(--r2);font-weight:800;
+  letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;}
+.fi .fie{font-family:'Fira Code',monospace;font-size:1rem;font-weight:600;color:var(--dk);}
+.fi .fid{font-size:.72rem;color:var(--mut);margin-top:4px;}
+
+/* ── NAVIGATION ── */
+.tnav{display:flex;justify-content:space-between;gap:10px;
+  margin-top:32px;padding-top:22px;border-top:1px solid var(--bdr);}
+.nb{padding:11px 24px;border-radius:10px;font-size:.83rem;font-weight:700;
+  cursor:pointer;border:none;transition:all .15s;
+  display:flex;align-items:center;gap:7px;
+  font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.2px;}
+.nb.prev{background:var(--rll);color:var(--r2);border:1px solid var(--bdr);}
+.nb.prev:hover{background:var(--rl);border-color:var(--r);}
+.nb.next{background:linear-gradient(135deg,var(--r),var(--r2));color:#fff;
+  box-shadow:0 3px 12px rgba(3,105,161,.35);}
+.nb.next:hover{background:linear-gradient(135deg,var(--r2),var(--r3));
+  box-shadow:0 5px 18px rgba(3,105,161,.45);}
+.bdg{display:inline-flex;align-items:center;padding:2px 9px;border-radius:6px;
+  font-size:.67rem;font-weight:800;letter-spacing:.5px;}
+.bdg.ahl{background:#fff7ed;color:#ea580c;}
+.bdg.sl{background:#dbeafe;color:#1e40af;}
+
+/* ── SCROLL TOP ── */
+#sct{position:fixed;bottom:26px;right:26px;background:linear-gradient(135deg,var(--r),var(--r2));
+  color:#fff;border:none;width:40px;height:40px;border-radius:10px;
+  font-size:1.1rem;cursor:pointer;box-shadow:0 3px 14px rgba(3,105,161,.4);
+  display:none;align-items:center;justify-content:center;transition:all .15s;}
+#sct.show{display:flex;}#sct:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(3,105,161,.5);}
+
+@media(max-width:768px){
+  #ham{display:flex;}#sb{transform:translateX(-100%);}#sb.open{transform:translateX(0);}
+  #main{margin-left:0;padding:20px 18px 60px;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+  .crow{grid-template-columns:1fr 1fr;}
+  .ogrid{grid-template-columns:1fr;}
+  .fgrid{grid-template-columns:1fr;}
+  .hero{padding:28px 24px;}
+  .cc{padding:22px 18px;}
+  .tsrch,.tmod,.tsep{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tinner">
+    <button id="ham" onclick="toggleSB()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="tlogo-wrap">
+      <div class="tlogo">ChemLearn</div>
+      <div class="tsubtitle">IB Chemistry</div>
+    </div>
+    <div class="tsep"></div>
+    <div class="tmod">R2 · Kinetics &amp; Mechanism</div>
+    <div class="tsrch">
+      <span class="si">🔍</span>
+      <input type="text" placeholder="Search topics…" oninput="filterSB(this.value)">
+    </div>
+    <div class="tright">
+      <div class="tbadge">R2</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="sbhd">R2 · Kinetics</div>
+
+  <div class="sbmod">
+    <div class="sbmt open" onclick="toggleMod(this)">
+      Overview <span class="ar">▶</span>
+    </div>
+    <div class="sbitems">
+      <div class="sbi" id="sb-overview" onclick="showPage('overview')">
+        <span class="dot"></span> R2 Overview
+      </div>
+    </div>
+  </div>
+
+  <div class="sbmod">
+    <div class="sbmt open" onclick="toggleMod(this)">
+      R2.2 · Rate &amp; Collision <span class="ar">▶</span>
+    </div>
+    <div class="sbitems">
+      <div class="sbi" id="sb-rate-intro" onclick="showPage('rate-intro')">
+        <span class="dot"></span> Rate of Reaction
+      </div>
+      <div class="sbi" id="sb-collision" onclick="showPage('collision')">
+        <span class="dot"></span> Collision Theory
+      </div>
+      <div class="sbi" id="sb-factors" onclick="showPage('factors')">
+        <span class="dot"></span> Factors Affecting Rate
+      </div>
+      <div class="sbi" id="sb-maxwell" onclick="showPage('maxwell')">
+        <span class="dot"></span> Maxwell-Boltzmann
+      </div>
+      <div class="sbi" id="sb-catalyst" onclick="showPage('catalyst')">
+        <span class="dot"></span> Catalysts
+      </div>
+      <div class="sbi" id="sb-vocab1" onclick="showPage('vocab1')">
+        <span class="dot"></span> Vocabulary
+      </div>
+    </div>
+  </div>
+
+  <div class="sbmod">
+    <div class="sbmt open" onclick="toggleMod(this)">
+      R2.2 AHL · Rate Expression <span class="ar">▶</span>
+    </div>
+    <div class="sbitems">
+      <div class="sbi" id="sb-rate-expr" onclick="showPage('rate-expr')">
+        <span class="dot"></span> Rate Expression <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-mechanism" onclick="showPage('mechanism')">
+        <span class="dot"></span> Reaction Mechanism <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-order" onclick="showPage('order')">
+        <span class="dot"></span> Order of Reaction <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-rate-const" onclick="showPage('rate-const')">
+        <span class="dot"></span> Rate Constant k <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-graphs" onclick="showPage('graphs')">
+        <span class="dot"></span> Graphical Analysis <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-vocab2" onclick="showPage('vocab2')">
+        <span class="dot"></span> Vocabulary <span class="sbb ahl">AHL</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sbmod">
+    <div class="sbmt open" onclick="toggleMod(this)">
+      R2.2 AHL · Arrhenius <span class="ar">▶</span>
+    </div>
+    <div class="sbitems">
+      <div class="sbi" id="sb-arrhenius" onclick="showPage('arrhenius')">
+        <span class="dot"></span> Arrhenius Equation <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-arrhenius-graph" onclick="showPage('arrhenius-graph')">
+        <span class="dot"></span> Graphical Form <span class="sbb ahl">AHL</span>
+      </div>
+      <div class="sbi" id="sb-vocab3" onclick="showPage('vocab3')">
+        <span class="dot"></span> Vocabulary <span class="sbb ahl">AHL</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pbwrap">
+    <div class="pblbl"><span>Progress</span><span id="pb-pct">0%</span></div>
+    <div class="pbbar"><div class="pbfill" id="pb-fill"></div></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="layout">
+<div id="main">
+
+<!-- ═══════════════════════════════════ OVERVIEW ═══════════════════════════════════ -->
+<div class="page" id="page-overview">
+  <div class="hero">
+    <h1>R2 · Kinetics &amp; Mechanism</h1>
+    <p>How fast do reactions happen — and why? Explore rate expressions, collision theory, Maxwell-Boltzmann distributions, reaction mechanisms, and the Arrhenius equation.</p>
+    <div class="hrow">
+      <span class="hchip">⚡ Rate of Reaction</span>
+      <span class="hchip">💥 Collision Theory</span>
+      <span class="hchip hl">📐 Rate Expression (AHL)</span>
+      <span class="hchip hl">🔑 Arrhenius Equation (AHL)</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="sv">3</div><div class="sl">Sub-Topics</div></div>
+    <div class="stat"><div class="sv">5</div><div class="sl">SL Outcomes</div></div>
+    <div class="stat"><div class="sv">7</div><div class="sl">AHL Outcomes</div></div>
+    <div class="stat"><div class="sv">22</div><div class="sl">Key Terms</div></div>
+  </div>
+
+  <div class="cc">
+    <h2>Guiding Questions</h2>
+    <div class="crow">
+      <div class="ccard">
+        <div class="ci">⚗️</div>
+        <div class="ct">Rate &amp; Collision</div>
+        <div class="cd">How can the rate of a reaction be controlled?</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">📊</div>
+        <div class="ct">Rate Expression</div>
+        <div class="cd">What is the relationship between the rate equation and the mechanism?</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">🌡️</div>
+        <div class="ct">Arrhenius</div>
+        <div class="cd">What is the relationship between the rate constant, temperature, and activation energy?</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>All Topics</h2>
+  <div class="mgrid">
+    <div class="mc" onclick="showPage('rate-intro')">
+      <div class="mn">R2.2 · SL</div>
+      <div class="mt">Rate of Reaction</div>
+      <div class="md">Change in concentration of reactant/product per unit time.</div>
+      <div class="mf">→ Start here</div>
+    </div>
+    <div class="mc" onclick="showPage('collision')">
+      <div class="mn">R2.2 · SL</div>
+      <div class="mt">Collision Theory</div>
+      <div class="md">Particles react via collisions with sufficient energy and proper orientation.</div>
+      <div class="mf">→ Open</div>
+    </div>
+    <div class="mc" onclick="showPage('factors')">
+      <div class="mn">R2.2 · SL</div>
+      <div class="mt">Factors Affecting Rate</div>
+      <div class="md">Concentration, pressure, surface area, temperature, catalyst.</div>
+      <div class="mf">→ Open</div>
+    </div>
+    <div class="mc" onclick="showPage('maxwell')">
+      <div class="mn">R2.2 · SL</div>
+      <div class="mt">Maxwell-Boltzmann</div>
+      <div class="md">Energy distribution curves and their use in explaining temperature effects.</div>
+      <div class="mf">→ Open</div>
+    </div>
+    <div class="mc" onclick="showPage('catalyst')">
+      <div class="mn">R2.2 · SL</div>
+      <div class="mt">Catalysts &amp; Energy Profiles</div>
+      <div class="md">Alternative pathway with lower Eₐ. Endothermic and exothermic profiles.</div>
+      <div class="mf">→ Open</div>
+    </div>
+    <div class="mc ahl" onclick="showPage('rate-expr')">
+      <div class="mn">R2.2 · AHL</div>
+      <div class="mt">Rate Expression</div>
+      <div class="md">Deducing rate equations and understanding reaction orders from data.</div>
+      <div class="mf">→ Open <span class="bdg ahl">AHL</span></div>
+    </div>
+    <div class="mc ahl" onclick="showPage('mechanism')">
+      <div class="mn">R2.2 · AHL</div>
+      <div class="mt">Reaction Mechanism</div>
+      <div class="md">Elementary steps, rate-determining step, intermediates vs. transition states.</div>
+      <div class="mf">→ Open <span class="bdg ahl">AHL</span></div>
+    </div>
+    <div class="mc ahl" onclick="showPage('arrhenius')">
+      <div class="mn">R2.2 · AHL</div>
+      <div class="mt">Arrhenius Equation</div>
+      <div class="md">k = Ae^(−Eₐ/RT) — linking rate constant, temperature, and activation energy.</div>
+      <div class="mf">→ Open <span class="bdg ahl">AHL</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ RATE INTRO ═══════════════════════════════════ -->
+<div class="page" id="page-rate-intro">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Rate of Reaction</div>
+  <div class="cc">
+    <div class="ptitle">Rate of Reaction</div>
+    <div class="psub">R2.2 · Standard Level</div>
+
+    <div class="gbox">
+      <div class="gl">Guiding Question</div>
+      <p>How can the rate of a reaction be controlled?</p>
+    </div>
+
+    <h2>Definition</h2>
+    <p>The <strong>rate of reaction</strong> is expressed as the change in concentration of a particular reactant or product per unit time.</p>
+    <div class="fml">
+      <div class="blbl">Formula</div>
+      Rate = Δ[concentration] / Δtime &nbsp;&nbsp;&nbsp; (units: mol dm⁻³ s⁻¹)
+    </div>
+
+    <h2>Measuring Rate</h2>
+    <p>Concentration changes in reactions are not usually measured directly. Common indirect methods include:</p>
+    <ul>
+      <li><strong>Gas volume or pressure</strong> — collected over time for gas-producing reactions</li>
+      <li><strong>Mass loss</strong> — when a gas is evolved (e.g., CO₂ from CaCO₃ + HCl)</li>
+      <li><strong>Colorimetry / absorbance</strong> — for reactions involving coloured species</li>
+      <li><strong>Electrical conductivity</strong> — when ion concentrations change</li>
+      <li><strong>Titration samples</strong> — quenched at intervals and titrated</li>
+    </ul>
+
+    <div class="note">
+      <div class="blbl">Key skill</div>
+      When time is the <em>independent</em> variable, you control time and measure how much has reacted. When time is the <em>dependent</em> variable, you measure the time for a fixed observable change (e.g., a colour change or precipitate formation).
+    </div>
+
+    <h2>Rate from Graphs</h2>
+    <p>Rate at a given instant is found from the <strong>gradient (slope)</strong> of a concentration–time graph:</p>
+    <ul>
+      <li><strong>Average rate</strong> — gradient of a chord between two points</li>
+      <li><strong>Instantaneous rate</strong> — gradient of the <em>tangent</em> at a specific time</li>
+    </ul>
+    <div class="warn">
+      <div class="blbl">Common error</div>
+      Graphs of rate data can show <strong>systematic error</strong> (consistent offset from true value) and <strong>random error</strong> (scatter around the line). The shape of residuals helps distinguish them.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('overview')">← Overview</button>
+    <button class="nb next" onclick="showPage('collision')">Collision Theory →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ COLLISION THEORY ═══════════════════════════════════ -->
+<div class="page" id="page-collision">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Collision Theory</div>
+  <div class="cc">
+    <div class="ptitle">Collision Theory</div>
+    <div class="psub">R2.2 · Standard Level</div>
+
+    <h2>Core Principle</h2>
+    <p>Species react as a result of <strong>collisions of sufficient energy</strong> and <strong>proper orientation</strong>. Not every collision leads to a reaction.</p>
+
+    <div class="crow">
+      <div class="ccard">
+        <div class="ci">⚡</div>
+        <div class="ct">Sufficient Energy</div>
+        <div class="cd">Colliding particles must meet or exceed the activation energy Eₐ.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">🎯</div>
+        <div class="ct">Proper Orientation</div>
+        <div class="cd">Molecules must collide in the right geometry for bonds to break and form.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">🔄</div>
+        <div class="ct">Collision Frequency</div>
+        <div class="cd">More frequent collisions generally increase the reaction rate.</div>
+      </div>
+    </div>
+
+    <h2>Activation Energy (Eₐ)</h2>
+    <p><strong>Activation energy, Eₐ</strong>, is the minimum energy that colliding particles need for a successful collision leading to a reaction.</p>
+    <div class="dbox">
+      <div class="dt">Definition</div>
+      <p>Eₐ is the energy difference between the reactants and the transition state (the highest-energy point on the reaction coordinate). It represents the energy barrier that must be overcome.</p>
+    </div>
+
+    <h2>Link to Kinetic Molecular Theory</h2>
+    <p>Collision theory is an extension of <strong>kinetic molecular theory</strong>. Particles in a gas or liquid are in constant random motion. The distribution of kinetic energies is described by the <strong>Maxwell-Boltzmann distribution</strong>. Only the fraction of particles with energy ≥ Eₐ can react upon collision.</p>
+
+    <div class="tip">
+      <div class="blbl">Exam tip</div>
+      Always link collision theory to Maxwell-Boltzmann distributions when explaining how temperature increases rate — it's more precise than saying "particles move faster."
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('rate-intro')">← Rate of Reaction</button>
+    <button class="nb next" onclick="showPage('factors')">Factors Affecting Rate →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ FACTORS ═══════════════════════════════════ -->
+<div class="page" id="page-factors">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Factors Affecting Rate</div>
+  <div class="cc">
+    <div class="ptitle">Factors Affecting Rate</div>
+    <div class="psub">R2.2 · Standard Level</div>
+
+    <h2>Key Variables</h2>
+    <p>Factors that influence the rate of a reaction include <strong>pressure/concentration</strong>, <strong>surface area</strong>, <strong>temperature</strong>, and the presence of a <strong>catalyst</strong>.</p>
+
+    <table class="dtbl">
+      <tr>
+        <th>Factor</th><th>Effect on Rate</th><th>Reason</th>
+      </tr>
+      <tr>
+        <td><strong>↑ Concentration / Pressure</strong></td>
+        <td>Rate increases</td>
+        <td>More particles per unit volume → more frequent collisions</td>
+      </tr>
+      <tr>
+        <td><strong>↑ Surface Area</strong></td>
+        <td>Rate increases</td>
+        <td>More exposed particles → more collisions possible</td>
+      </tr>
+      <tr>
+        <td><strong>↑ Temperature</strong></td>
+        <td>Rate increases significantly</td>
+        <td>Greater fraction of particles exceed Eₐ; more frequent collisions</td>
+      </tr>
+      <tr>
+        <td><strong>Adding a Catalyst</strong></td>
+        <td>Rate increases</td>
+        <td>Alternative pathway with lower Eₐ</td>
+      </tr>
+    </table>
+
+    <div class="note">
+      <div class="blbl">Controlling Variables</div>
+      When investigating the effect of ONE factor on rate, all other variables must be controlled. For example, when testing the effect of concentration, temperature and surface area must remain constant.
+    </div>
+
+    <h2>Temperature — A Special Case</h2>
+    <p>A small increase in temperature causes a <em>disproportionately large</em> increase in rate. This is because the number of particles with energy ≥ Eₐ increases exponentially with temperature (related to the Arrhenius equation at AHL).</p>
+
+    <div class="tip">
+      <div class="blbl">Rule of thumb</div>
+      A 10 K rise in temperature approximately doubles the reaction rate for many reactions (though this depends on Eₐ).
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('collision')">← Collision Theory</button>
+    <button class="nb next" onclick="showPage('maxwell')">Maxwell-Boltzmann →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MAXWELL ═══════════════════════════════════ -->
+<div class="page" id="page-maxwell">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Maxwell-Boltzmann</div>
+  <div class="cc">
+    <div class="ptitle">Maxwell-Boltzmann Distribution</div>
+    <div class="psub">R2.2 · Standard Level</div>
+
+    <h2>What is the Maxwell-Boltzmann Curve?</h2>
+    <p>The <strong>Maxwell-Boltzmann energy distribution curve</strong> shows the distribution of kinetic energies among particles in a sample at a given temperature. The x-axis represents kinetic energy; the y-axis represents the number of particles (or probability).</p>
+
+    <div class="crow">
+      <div class="ccard">
+        <div class="ci">📈</div>
+        <div class="ct">Key Features</div>
+        <div class="cd">Starts at zero, rises to a peak (most probable energy), then tails off asymptotically.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">🌡️</div>
+        <div class="ct">Effect of Temperature</div>
+        <div class="cd">Higher T → curve flattens and shifts right; peak lowers; more particles exceed Eₐ.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">⚡</div>
+        <div class="ct">Eₐ on the Curve</div>
+        <div class="cd">Area under curve to the right of Eₐ = fraction of particles that can react.</div>
+      </div>
+    </div>
+
+    <h2>Effect of Temperature</h2>
+    <p>When temperature increases:</p>
+    <ul>
+      <li>The peak shifts to the <strong>right</strong> (higher most probable energy)</li>
+      <li>The peak <strong>lowers</strong> (total area under curve stays the same)</li>
+      <li>The curve <strong>broadens</strong></li>
+      <li>A significantly <strong>larger fraction</strong> of particles have energy ≥ Eₐ</li>
+    </ul>
+
+    <h2>Effect of Eₐ on Reaction Rate</h2>
+    <p>For two reactions at the same temperature, a reaction with a <strong>lower Eₐ</strong> will have a greater fraction of particles that can react — so it proceeds faster. The Maxwell-Boltzmann curve lets you compare these fractions visually.</p>
+
+    <div class="dbox">
+      <div class="dt">Effect of a Catalyst</div>
+      <p>A catalyst lowers Eₐ — on the Maxwell-Boltzmann curve, you can show this by moving the Eₐ marker to the left, revealing that a much larger fraction of particles now have sufficient energy to react, even at the same temperature.</p>
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('factors')">← Factors Affecting Rate</button>
+    <button class="nb next" onclick="showPage('catalyst')">Catalysts →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ CATALYST ═══════════════════════════════════ -->
+<div class="page" id="page-catalyst">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Catalysts</div>
+  <div class="cc">
+    <div class="ptitle">Catalysts &amp; Energy Profiles</div>
+    <div class="psub">R2.2 · Standard Level</div>
+
+    <h2>How Catalysts Work</h2>
+    <p><strong>Catalysts</strong> increase the rate of reaction by providing an <strong>alternative reaction pathway</strong> with a lower activation energy, Eₐ.</p>
+    <ul>
+      <li>They are <strong>not consumed</strong> in the overall reaction</li>
+      <li>They affect both forward and reverse reactions <strong>equally</strong> — equilibrium position does not change</li>
+      <li>They do <strong>not</strong> change the enthalpy change (ΔH) of the reaction</li>
+    </ul>
+
+    <div class="note">
+      <div class="blbl">Equilibrium link</div>
+      The catalyst increases the rate of BOTH the forward and reverse reactions by the same factor. This means equilibrium is reached faster, but the equilibrium position (Kc) is unchanged.
+    </div>
+
+    <h2>Energy Profiles</h2>
+    <p>An energy profile (reaction coordinate diagram) shows energy on the y-axis and reaction progress on the x-axis. You need to be able to sketch and explain these:</p>
+
+    <table class="dtbl">
+      <tr><th>Feature</th><th>Exothermic</th><th>Endothermic</th></tr>
+      <tr>
+        <td>Products vs. Reactants</td>
+        <td>Products are <strong>lower</strong> in energy</td>
+        <td>Products are <strong>higher</strong> in energy</td>
+      </tr>
+      <tr>
+        <td>ΔH</td>
+        <td>Negative (−)</td>
+        <td>Positive (+)</td>
+      </tr>
+      <tr>
+        <td>Eₐ (forward)</td>
+        <td>Smaller than Eₐ (reverse)</td>
+        <td>Larger than Eₐ (reverse)</td>
+      </tr>
+    </table>
+
+    <h2>Catalyst on an Energy Profile</h2>
+    <p>With a catalyst, the energy profile shows a <strong>lower activation energy hump</strong>. The positions of reactants and products (and therefore ΔH) remain unchanged — only the transition state is lowered.</p>
+
+    <div class="tip">
+      <div class="blbl">Types of catalysts</div>
+      <strong>Homogeneous catalysts</strong> are in the same phase as the reactants. <strong>Heterogeneous catalysts</strong> are in a different phase (often solid catalysts with gaseous/liquid reactants). Transition metals are particularly useful as heterogeneous catalysts due to their variable oxidation states and ability to adsorb reactants.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('maxwell')">← Maxwell-Boltzmann</button>
+    <button class="nb next" onclick="showPage('vocab1')">Vocabulary →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ VOCAB 1 ═══════════════════════════════════ -->
+<div class="page" id="page-vocab1">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Vocabulary (SL)</div>
+  <div class="cc">
+    <div class="ptitle">Key Vocabulary — R2.2 SL</div>
+    <div class="psub">Rate of Reaction &amp; Collision Theory</div>
+    <table class="vtbl">
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="tm">kinetic theory</td><td>Theory describing the motion of particles in gases and liquids.</td></tr>
+      <tr><td class="tm">collision theory</td><td>Reactions occur when particles collide with sufficient energy and correct orientation.</td></tr>
+      <tr><td class="tm">rate of reaction</td><td>Change in concentration of reactant/product per unit time (mol dm⁻³ s⁻¹).</td></tr>
+      <tr><td class="tm">gradient</td><td>Slope of a graph; used to find average or instantaneous rate.</td></tr>
+      <tr><td class="tm">tangent</td><td>A line touching a curve at one point; its slope gives the instantaneous rate.</td></tr>
+      <tr><td class="tm">surface area</td><td>Total exposed area of a solid reactant; greater surface area → faster rate.</td></tr>
+      <tr><td class="tm">activation energy (Eₐ)</td><td>Minimum energy required for a collision to be successful.</td></tr>
+      <tr><td class="tm">Maxwell-Boltzmann curve</td><td>Graph showing distribution of kinetic energies of particles at a given temperature.</td></tr>
+      <tr><td class="tm">alternative pathway</td><td>The route provided by a catalyst with lower activation energy.</td></tr>
+      <tr><td class="tm">catalyst</td><td>Substance that increases rate without being consumed; lowers Eₐ.</td></tr>
+    </table>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('catalyst')">← Catalysts</button>
+    <button class="nb next" onclick="showPage('rate-expr')">Rate Expression (AHL) →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ RATE EXPRESSION ═══════════════════════════════════ -->
+<div class="page" id="page-rate-expr">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Rate Expression <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">Rate Expression &amp; Order of Reaction</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <div class="ahlbox">
+      <div class="at">⚠ AHL Content</div>
+      This section is required for Higher Level students only.
+    </div>
+
+    <div class="gbox">
+      <div class="gl">Guiding Question</div>
+      <p>What is the relationship between the rate equation and the mechanism of a chemical reaction?</p>
+    </div>
+
+    <h2>The Rate Equation</h2>
+    <p>For a reaction A + B → products, the rate equation (rate expression) takes the form:</p>
+    <div class="fml">
+      <div class="blbl">Rate equation</div>
+      rate = k[A]ᵐ[B]ⁿ
+    </div>
+    <p>Where <strong>k</strong> is the rate constant, <strong>m</strong> is the order with respect to A, and <strong>n</strong> is the order with respect to B.</p>
+
+    <div class="warn">
+      <div class="blbl">Critical point</div>
+      Rate equations can ONLY be determined experimentally — they cannot be deduced from the balanced stoichiometric equation.
+    </div>
+
+    <h2>Order of Reaction</h2>
+    <p>The <strong>order with respect to a reactant</strong> is the exponent to which its concentration is raised in the rate equation. It describes how many particles of that reactant take part in the rate-determining step.</p>
+
+    <table class="dtbl">
+      <tr><th>Order</th><th>Rate ∝</th><th>Meaning</th></tr>
+      <tr><td><strong>Zero (0)</strong></td><td>constant</td><td>Rate independent of [A]; A not in rate-determining step</td></tr>
+      <tr><td><strong>First (1)</strong></td><td>[A]</td><td>Rate doubles when [A] doubles</td></tr>
+      <tr><td><strong>Second (2)</strong></td><td>[A]²</td><td>Rate quadruples when [A] doubles</td></tr>
+    </table>
+
+    <p>The <strong>overall reaction order</strong> is the sum of all individual orders: m + n.</p>
+
+    <h2>Units of the Rate Constant k</h2>
+    <p>The units of k depend on the overall reaction order. They must make the rate equation dimensionally consistent (rate has units mol dm⁻³ s⁻¹).</p>
+    <div class="fgrid">
+      <div class="fi"><div class="fil">Zero order</div><div class="fie">mol dm⁻³ s⁻¹</div></div>
+      <div class="fi"><div class="fil">First order</div><div class="fie">s⁻¹</div></div>
+      <div class="fi"><div class="fil">Second order</div><div class="fie">mol⁻¹ dm³ s⁻¹</div></div>
+      <div class="fi"><div class="fil">Third order</div><div class="fie">mol⁻² dm⁶ s⁻¹</div></div>
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('vocab1')">← SL Vocabulary</button>
+    <button class="nb next" onclick="showPage('mechanism')">Reaction Mechanism →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ MECHANISM ═══════════════════════════════════ -->
+<div class="page" id="page-mechanism">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Reaction Mechanism <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">Reaction Mechanism</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <h2>Elementary Steps</h2>
+    <p>Many reactions occur in a series of <strong>elementary steps</strong>. The overall reaction is the sum of these steps. The <strong>slowest step</strong> determines the rate of the overall reaction — this is the <strong>rate-determining step (RDS)</strong>.</p>
+
+    <div class="crow">
+      <div class="ccard">
+        <div class="ci">🐢</div>
+        <div class="ct">Rate-Determining Step</div>
+        <div class="cd">The slowest elementary step; it acts as the bottleneck for the whole reaction.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">🔀</div>
+        <div class="ct">Intermediate</div>
+        <div class="cd">A species formed and consumed during the mechanism; does NOT appear in the overall equation.</div>
+      </div>
+      <div class="ccard">
+        <div class="ci">⚡</div>
+        <div class="ct">Transition State</div>
+        <div class="cd">The highest-energy point on an energy profile; a transient species that cannot be isolated.</td>
+        </div>
+      </div>
+    </div>
+
+    <h2>Intermediates vs. Transition States</h2>
+    <table class="dtbl">
+      <tr><th></th><th>Intermediate</th><th>Transition State</th></tr>
+      <tr><td>On energy profile</td><td>A <strong>trough</strong> (local minimum)</td><td>A <strong>peak</strong> (local maximum)</td></tr>
+      <tr><td>Can be isolated?</td><td>Yes (in principle)</td><td>No</td></tr>
+      <tr><td>Lifetime</td><td>Finite (brief)</td><td>Effectively zero</td></tr>
+    </table>
+
+    <h2>Molecularity</h2>
+    <p>The <strong>molecularity</strong> of an elementary step is the number of reacting particles involved:</p>
+    <div class="fgrid">
+      <div class="fi"><div class="fil">Unimolecular</div><div class="fie">1 particle</div><div class="fid">e.g., A → products</div></div>
+      <div class="fi"><div class="fil">Bimolecular</div><div class="fie">2 particles</div><div class="fid">e.g., A + B → products</div></div>
+      <div class="fi"><div class="fil">Termolecular</div><div class="fie">3 particles</div><div class="fid">Rare; requires 3 simultaneous collisions</div></div>
+      <div class="fi"><div class="fil">Note</div><div class="fie">—</div><div class="fid">Molecularity applies to elementary steps only, not overall equations</div></div>
+    </div>
+
+    <h2>Evaluating Mechanisms</h2>
+    <p>A proposed mechanism is consistent if:</p>
+    <ol>
+      <li>The elementary steps <strong>sum to give the overall equation</strong></li>
+      <li>The species in the <strong>slow step</strong> match the reactants in the rate equation</li>
+      <li>All <strong>intermediates cancel out</strong> in the sum</li>
+    </ol>
+    <div class="note">
+      <div class="blbl">Important caveat</div>
+      Mechanisms are only considered "possible" — they can never be proven with absolute certainty from kinetic data alone.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('rate-expr')">← Rate Expression</button>
+    <button class="nb next" onclick="showPage('order')">Order of Reaction →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ ORDER ═══════════════════════════════════ -->
+<div class="page" id="page-order">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Order of Reaction <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">Deducing Order from Data</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <h2>Using Experimental Data</h2>
+    <p>To deduce the order with respect to each reactant, compare experiments where only one concentration is changed at a time ("initial rates method").</p>
+
+    <div class="exbox">
+      <div class="exhd">📋 Worked Example</div>
+      <div class="exbd">
+        <p>Given the data below for A + B → products:</p>
+        <table class="dtbl">
+          <tr><th>Exp.</th><th>[A] / mol dm⁻³</th><th>[B] / mol dm⁻³</th><th>Rate / mol dm⁻³ s⁻¹</th></tr>
+          <tr><td>1</td><td>0.10</td><td>0.10</td><td>2.0 × 10⁻³</td></tr>
+          <tr><td>2</td><td>0.20</td><td>0.10</td><td>4.0 × 10⁻³</td></tr>
+          <tr><td>3</td><td>0.10</td><td>0.20</td><td>8.0 × 10⁻³</td></tr>
+        </table>
+        <p><strong>Step 1:</strong> Compare Exp 1 & 2 (only [A] changes): rate doubles when [A] doubles → order = 1 with respect to A.</p>
+        <p><strong>Step 2:</strong> Compare Exp 1 & 3 (only [B] changes): rate quadruples when [B] doubles → order = 2 with respect to B.</p>
+        <p><strong>Result:</strong> rate = k[A][B]², overall order = 3.</p>
+      </div>
+    </div>
+
+    <h2>Half-life (t½)</h2>
+    <p>The <strong>half-life</strong> is the time for the concentration of a reactant to fall to half its initial value.</p>
+    <table class="dtbl">
+      <tr><th>Order</th><th>Half-life relationship</th></tr>
+      <tr><td>Zero</td><td>t½ decreases as reaction proceeds</td></tr>
+      <tr><td>First</td><td>t½ is <strong>constant</strong> (independent of [A])</td></tr>
+      <tr><td>Second</td><td>t½ increases as reaction proceeds</td></tr>
+    </table>
+
+    <div class="tip">
+      <div class="blbl">First-order recognition</div>
+      A constant half-life is the hallmark of a first-order reaction. If successive half-lives are equal on a concentration–time graph, the reaction is first order.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('mechanism')">← Reaction Mechanism</button>
+    <button class="nb next" onclick="showPage('rate-const')">Rate Constant k →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ RATE CONSTANT ═══════════════════════════════════ -->
+<div class="page" id="page-rate-const">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Rate Constant k <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">The Rate Constant, k</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <h2>Properties of k</h2>
+    <p>The rate constant <strong>k</strong> is a proportionality constant in the rate equation. Its key properties:</p>
+    <ul>
+      <li>k is <strong>temperature dependent</strong> — it increases with temperature</li>
+      <li>k is <strong>specific to a reaction</strong> at a given temperature</li>
+      <li>k is <strong>not affected</strong> by concentration changes</li>
+      <li>The units of k depend on the overall order of the reaction</li>
+    </ul>
+
+    <div class="dbox">
+      <div class="dt">Temperature dependence</div>
+      <p>The relationship between k and temperature is quantified by the Arrhenius equation (see next section). As T increases, k increases, so rate increases — even at constant concentration.</p>
+    </div>
+
+    <h2>Solving Problems with the Rate Equation</h2>
+    <div class="prbox">
+      <div class="prhd">🧮 Practice Problem</div>
+      <div class="prbd">
+        <p>For the reaction: rate = k[NO]²[O₂], the rate is 2.4 × 10⁻³ mol dm⁻³ s⁻¹ when [NO] = 0.020 mol dm⁻³ and [O₂] = 0.010 mol dm⁻³.</p>
+        <p>Calculate k and give its units.</p>
+        <p><strong>Solution:</strong> k = rate / ([NO]²[O₂]) = 2.4 × 10⁻³ / (0.020² × 0.010) = 2.4 × 10⁻³ / (4 × 10⁻⁶) = 600 mol⁻² dm⁶ s⁻¹</p>
+      </div>
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('order')">← Order of Reaction</button>
+    <button class="nb next" onclick="showPage('graphs')">Graphical Analysis →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ GRAPHS ═══════════════════════════════════ -->
+<div class="page" id="page-graphs">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Graphical Analysis <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">Graphical Representations of Order</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <h2>Concentration–Time Graphs</h2>
+    <table class="dtbl">
+      <tr><th>Order</th><th>[A] vs. time</th><th>Half-life</th></tr>
+      <tr><td><strong>Zero</strong></td><td>Straight line (linear decrease)</td><td>Decreasing</td></tr>
+      <tr><td><strong>First</strong></td><td>Exponential decay (curved)</td><td>Constant</td></tr>
+      <tr><td><strong>Second</strong></td><td>Curved, slower decline than 1st</td><td>Increasing</td></tr>
+    </table>
+
+    <h2>Rate–Concentration Graphs</h2>
+    <table class="dtbl">
+      <tr><th>Order</th><th>Rate vs. [A]</th><th>Shape</th></tr>
+      <tr><td><strong>Zero</strong></td><td>Horizontal line</td><td>Rate constant regardless of [A]</td></tr>
+      <tr><td><strong>First</strong></td><td>Straight line through origin</td><td>Rate ∝ [A]</td></tr>
+      <tr><td><strong>Second</strong></td><td>Parabola (upward curve)</td><td>Rate ∝ [A]²</td></tr>
+    </table>
+
+    <div class="tip">
+      <div class="blbl">Exam technique</div>
+      For multi-step data analysis: (1) plot [A] vs. time, (2) check if half-life is constant (1st order). If not, plot rate vs. [A] to distinguish zero and second order. Rate can be found from the gradient of a tangent on the [A] vs. t graph.
+    </div>
+
+    <h2>Energy Profiles for Multi-Step Reactions</h2>
+    <p>For a reaction with multiple elementary steps, the energy profile shows multiple peaks (one for each transition state) and troughs (one for each intermediate). The <strong>rate-determining step corresponds to the largest energy barrier</strong> (highest activation energy).</p>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('rate-const')">← Rate Constant k</button>
+    <button class="nb next" onclick="showPage('vocab2')">AHL Vocabulary →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ VOCAB 2 ═══════════════════════════════════ -->
+<div class="page" id="page-vocab2">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Vocabulary (AHL)</div>
+  <div class="cc">
+    <div class="ptitle">Key Vocabulary — R2.2 AHL</div>
+    <div class="psub">Rate Expression &amp; Reaction Mechanism</div>
+    <table class="vtbl">
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="tm">rate constant, k</td><td>Proportionality constant in the rate equation; temperature dependent.</td></tr>
+      <tr><td class="tm">rate expression/equation</td><td>Mathematical equation relating rate to concentrations: rate = k[A]ᵐ[B]ⁿ.</td></tr>
+      <tr><td class="tm">order of reaction</td><td>Exponent of a concentration term in the rate equation (0, 1, or 2 typically).</td></tr>
+      <tr><td class="tm">overall order</td><td>Sum of all individual orders in the rate equation.</td></tr>
+      <tr><td class="tm">half-life, t½</td><td>Time for concentration of a reactant to fall to half its initial value.</td></tr>
+      <tr><td class="tm">slow step</td><td>The rate-determining step; the bottleneck of the reaction mechanism.</td></tr>
+      <tr><td class="tm">rate-determining step</td><td>The slowest elementary step that limits the overall reaction rate.</td></tr>
+      <tr><td class="tm">molecularity</td><td>Number of reacting particles in an elementary step (uni-, bi-, termolecular).</td></tr>
+      <tr><td class="tm">transition state</td><td>Highest-energy species on the reaction coordinate; cannot be isolated.</td></tr>
+      <tr><td class="tm">intermediate</td><td>Species formed and consumed during a mechanism; appears as a trough on energy profiles.</td></tr>
+    </table>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('graphs')">← Graphical Analysis</button>
+    <button class="nb next" onclick="showPage('arrhenius')">Arrhenius Equation →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ ARRHENIUS ═══════════════════════════════════ -->
+<div class="page" id="page-arrhenius">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Arrhenius Equation <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">The Arrhenius Equation</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <div class="gbox">
+      <div class="gl">Guiding Question</div>
+      <p>What is the relationship between the rate constant, temperature, and activation energy?</p>
+    </div>
+
+    <h2>The Equation</h2>
+    <div class="fml">
+      <div class="blbl">Arrhenius Equation</div>
+      k = A · e^(−Eₐ / RT)
+    </div>
+
+    <div class="fgrid">
+      <div class="fi"><div class="fil">k</div><div class="fie">rate constant</div><div class="fid">temperature dependent</div></div>
+      <div class="fi"><div class="fil">A</div><div class="fie">Arrhenius factor</div><div class="fid">frequency of correctly-oriented collisions</div></div>
+      <div class="fi"><div class="fil">Eₐ</div><div class="fie">activation energy</div><div class="fid">in J mol⁻¹</div></div>
+      <div class="fi"><div class="fil">R</div><div class="fie">8.314 J K⁻¹ mol⁻¹</div><div class="fid">gas constant</div></div>
+      <div class="fi"><div class="fil">T</div><div class="fie">temperature (K)</div><div class="fid">must be in kelvin!</div></div>
+      <div class="fi"><div class="fil">e</div><div class="fie">Euler's number ≈ 2.718</div><div class="fid">base of natural logarithm</div></div>
+    </div>
+
+    <h2>The Arrhenius Factor, A</h2>
+    <p>The <strong>Arrhenius factor (pre-exponential factor)</strong>, A, takes into account:</p>
+    <ul>
+      <li>The <strong>frequency of collisions</strong></li>
+      <li>The <strong>fraction with proper orientation</strong> (steric factor)</li>
+    </ul>
+    <p>The units of A are the same as the units of k (determined by the overall order of reaction).</p>
+
+    <h2>Qualitative Relationship</h2>
+    <p>As temperature increases, the exponential term e^(−Eₐ/RT) increases — meaning a greater fraction of collisions have energy ≥ Eₐ. This results in a larger k and therefore a faster rate.</p>
+
+    <div class="note">
+      <div class="blbl">Key relationship</div>
+      Higher T → larger e^(−Eₐ/RT) → larger k → faster rate. For reactions with high Eₐ, k is more sensitive to temperature changes.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('vocab2')">← AHL Vocabulary</button>
+    <button class="nb next" onclick="showPage('arrhenius-graph')">Graphical Form →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ ARRHENIUS GRAPH ═══════════════════════════════════ -->
+<div class="page" id="page-arrhenius-graph">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Arrhenius — Graphical Form <span class="bdg ahl">AHL</span></div>
+  <div class="cc">
+    <div class="ptitle">Linear Form of the Arrhenius Equation</div>
+    <div class="psub">R2.2 AHL · Higher Level Only</div>
+
+    <h2>Linearisation</h2>
+    <p>Taking the natural logarithm of both sides of k = Ae^(−Eₐ/RT):</p>
+    <div class="fml">
+      <div class="blbl">Linear Arrhenius form</div>
+      ln k = −(Eₐ/R) · (1/T) + ln A
+    </div>
+    <p>This is in the form <strong>y = mx + c</strong> where:</p>
+    <ul>
+      <li>y = ln k</li>
+      <li>x = 1/T</li>
+      <li>slope (m) = −Eₐ/R</li>
+      <li>y-intercept (c) = ln A</li>
+    </ul>
+
+    <h2>Using the Arrhenius Graph</h2>
+    <p>Plot <strong>ln k</strong> (y-axis) against <strong>1/T</strong> (x-axis):</p>
+    <ul>
+      <li>The graph is a <strong>straight line</strong> with negative slope</li>
+      <li><strong>Eₐ = −slope × R</strong></li>
+      <li><strong>A = e^(y-intercept)</strong></li>
+    </ul>
+
+    <div class="exbox">
+      <div class="exhd">📋 Worked Example</div>
+      <div class="exbd">
+        <p>A plot of ln k vs. 1/T gives a slope of −9600 K. Calculate Eₐ.</p>
+        <p><strong>Solution:</strong> Eₐ = −slope × R = −(−9600) × 8.314 = 79,814 J mol⁻¹ ≈ 79.8 kJ mol⁻¹</p>
+      </div>
+    </div>
+
+    <h2>Two-Temperature Form</h2>
+    <p>If you have k at two temperatures, you can use:</p>
+    <div class="fml">
+      <div class="blbl">Two-point Arrhenius</div>
+      ln(k₂/k₁) = −(Eₐ/R) · (1/T₂ − 1/T₁)
+    </div>
+    <div class="tip">
+      <div class="blbl">Units check</div>
+      Always convert temperature to kelvin. Eₐ will come out in J mol⁻¹ (using R = 8.314 J K⁻¹ mol⁻¹) — convert to kJ mol⁻¹ for a cleaner answer.
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('arrhenius')">← Arrhenius Equation</button>
+    <button class="nb next" onclick="showPage('vocab3')">Arrhenius Vocabulary →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ VOCAB 3 ═══════════════════════════════════ -->
+<div class="page" id="page-vocab3">
+  <div class="bc"><a onclick="showPage('overview')">R2 Overview</a><span class="sep">›</span> Vocabulary (Arrhenius)</div>
+  <div class="cc">
+    <div class="ptitle">Key Vocabulary — Arrhenius</div>
+    <div class="psub">R2.2 AHL · Activation Energy</div>
+    <table class="vtbl">
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td class="tm">Arrhenius equation</td><td>k = Ae^(−Eₐ/RT); relates rate constant to temperature and activation energy.</td></tr>
+      <tr><td class="tm">Arrhenius factor (A)</td><td>Pre-exponential factor; accounts for collision frequency and orientation. Units same as k.</td></tr>
+      <tr><td class="tm">frequency factor</td><td>Another name for the Arrhenius factor A.</td></tr>
+      <tr><td class="tm">ln</td><td>Natural logarithm (log to base e ≈ 2.718). Used in the linear form of the Arrhenius equation.</td></tr>
+      <tr><td class="tm">linear Arrhenius plot</td><td>Graph of ln k vs. 1/T; gives a straight line with slope = −Eₐ/R and intercept = ln A.</td></tr>
+    </table>
+
+    <div class="note" style="margin-top:20px;">
+      <div class="blbl">Revision checklist</div>
+      ✓ State and use the Arrhenius equation &nbsp;|&nbsp; ✓ Describe qualitative T–k relationship &nbsp;|&nbsp; ✓ Analyse ln k vs. 1/T graphs &nbsp;|&nbsp; ✓ Determine Eₐ and A from data
+    </div>
+  </div>
+  <div class="tnav">
+    <button class="nb prev" onclick="showPage('arrhenius-graph')">← Graphical Form</button>
+    <button class="nb next" onclick="showPage('overview')">← Back to Overview</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<button id="sct" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const visited = new Set();
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sbi').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sbmt').forEach(t => t.classList.remove('active-mod'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) { pg.classList.add('active'); window.scrollTo(0, 0); }
+  const sb = document.getElementById('sb-' + id);
+  if (sb) {
+    sb.classList.add('active');
+    const items = sb.parentElement;
+    if (items) items.style.maxHeight = '2000px';
+    const title = items ? items.previousElementSibling : null;
+    if (title) title.classList.add('active-mod');
+  }
+  if (id === 'overview') {
+    const ov = document.querySelector('.sbmt');
+    if (ov) ov.classList.add('active-mod');
+  }
+  visited.add(id); updatePB();
+  document.getElementById('sb').classList.remove('open');
+}
+
+function updatePB() {
+  const total = document.querySelectorAll('.sbi').length;
+  const pct = Math.round((visited.size / total) * 100);
+  document.getElementById('pb-pct').textContent = pct + '%';
+  document.getElementById('pb-fill').style.width = pct + '%';
+}
+
+function toggleMod(el) {
+  const items = el.nextElementSibling;
+  const open = items.style.maxHeight && items.style.maxHeight !== '0px';
+  items.style.maxHeight = open ? '0px' : '2000px';
+  items.style.transition = 'max-height .3s';
+  el.classList.toggle('open', !open);
+}
+
+document.querySelectorAll('.sbitems').forEach(el => {
+  el.style.maxHeight = '2000px';
+  el.style.overflow = 'hidden';
+  if (el.previousElementSibling) el.previousElementSibling.classList.add('open');
+});
+
+function toggleSB() { document.getElementById('sb').classList.toggle('open'); }
+
+function filterSB(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.sbi').forEach(i => {
+    i.style.display = (!q || i.textContent.toLowerCase().includes(q)) ? '' : 'none';
+  });
+  if (q) document.querySelectorAll('.sbitems').forEach(el => el.style.maxHeight = '2000px');
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('sct').classList.toggle('show', window.scrollY > 300);
+});
+
+showPage('overview');
+</script>
+</body>
+</html>
